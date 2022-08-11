@@ -36,7 +36,7 @@ ________________________________________________________________________________
 
 
 
-
+![OPCuaLog](https://user-images.githubusercontent.com/92536730/184158600-54fcf55c-1fe2-457d-a677-1b4664894b96.png)
 
 
 
@@ -142,11 +142,13 @@ Direct Acting:
 
 
 
+![SimA](https://user-images.githubusercontent.com/92536730/184158772-930a5a03-c6c9-4587-91f7-919cd2301f4b.PNG)
 
 
 
-Reverse Acting:
 
+
+![SimB](https://user-images.githubusercontent.com/92536730/184158750-bdf044b2-5514-4ce0-a170-abfeb8f3bc2f.PNG)
 
 
 
@@ -171,6 +173,7 @@ Simulates a Process:
 
 
 
+![OPCuaSim](https://user-images.githubusercontent.com/92536730/184160541-6ea3234d-af96-4b89-81db-92dc13a68329.PNG)
 
 
 To launch use:
@@ -182,7 +185,9 @@ plcsim.main()
 ```
 
 
+_________________________________________________________________________________________________________________________
+
 Windows Exe:
 
 
-![Pytunelogix](https://user-images.githubusercontent.com/92536730/183046630-5fb861b3-9824-4276-b7f5-1afa51b1236c.PNG)
+![image](https://user-images.githubusercontent.com/92536730/184161990-c221eec5-acc6-43b8-ad2f-85367814301a.png)
