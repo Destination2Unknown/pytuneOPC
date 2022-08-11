@@ -45,7 +45,7 @@ To launch use:
 ```
 from pytuneOPC.pidlogger import plclogger
 
-clxlogger.main()
+plclogger.main()
     
 ```
 
@@ -178,7 +178,7 @@ Simulates a Process:
 
 To launch use:
 ```
-from pytuneOPC.plcpidsim import clxsim
+from pytuneOPC.plcpidsim import plcsim
 
 plcsim.main()
     
