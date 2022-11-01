@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='pytuneOPC',
-    version='1.1.2',
+    version='1.1.3',
     license='MIT',
     author="Destination2Unknown",
     author_email='destination0b10unknown@gmail.com',
@@ -27,6 +27,5 @@ setup(
           'matplotlib',
           'asyncua',
           'pandas',
-          'pytunelogix',
       ],
 )

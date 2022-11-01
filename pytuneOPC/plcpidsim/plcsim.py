@@ -22,7 +22,8 @@ import time
 from matplotlib import animation
 from scipy.integrate import odeint
 from asyncua.sync import Client,ua
-from pytunelogix.common import generalclasses as g
+from pytuneOPC.common import generalclasses as g
+from tkinter import messagebox
 
 def main():
     class data(object):
@@ -32,10 +33,6 @@ def main():
             self.SP = np.zeros(0)
             self.livetrend=0
             self.scanCount=0
-            self.PID_PV=0
-            self.PID_SP=0
-            self.PID_CV=0
-            self.looper=0
         def storereads(self,CV,SP):
             self.CV=np.append(self.CV,CV)
             self.SP=np.append(self.SP,SP)
@@ -50,47 +47,54 @@ def main():
             self.comm = Client(ip)
 
     def fopdtsetup():
-        process.Gain=float(modelgain.get())
-        process.TimeConstant=float(modeltc.get())*10
-        process.DeadTime=float(modeldt.get())*10
-        process.Bias=float(ambient.get())
-        process.t=0
-        gData.reset()
-        gData.livetrend=1
-        spstatus.set("")
-        pvstatus.set("")
-        cvstatus.set("")
-        gData.plc(ip.get())            
-        gData.comm.connect() 
-        button_start["state"] = "disabled"
-        button_stop["state"] = "normal"
-        button_trend["state"] = "normal"
-        button_save["state"] = "normal"
-        ip.configure(state="disabled")
-        modelgain.configure(state="disabled")
-        modeltc.configure(state="disabled")
-        modeldt.configure(state="disabled")
-        ambient.configure(state="disabled")
-        gData.PID_PV = gData.comm.get_node(pvtag.get())
-        gData.PID_CV = gData.comm.get_node(cvtag.get())
-        gData.PID_SP = gData.comm.get_node(sptag.get())
+        try:
+            process.Gain=float(modelgain.get())
+            process.TimeConstant=float(modeltc.get())
+            process.DeadTime=float(modeldt.get())
+            process.Bias=float(ambient.get())
+            process.t=0
+            gData.reset()            
+            spstatus.set("")
+            pvstatus.set("")
+            cvstatus.set("")
+            gData.plc(ip.get())            
+            gData.comm.connect() 
+            gData.livetrend=1
+            button_start["state"] = "disabled"
+            button_stop["state"] = "normal"
+            button_trend["state"] = "normal"
+            button_save["state"] = "normal"
+            ip.configure(state="disabled")
+            modelgain.configure(state="disabled")
+            modeltc.configure(state="disabled")
+            modeldt.configure(state="disabled")
+            ambient.configure(state="disabled")
+            cvtag.configure(state="disabled")
+            sptag.configure(state="disabled")
+            pvtag.configure(state="disabled")
+            gData.PID_PV = gData.comm.get_node(pvtag.get())
+            gData.PID_CV = gData.comm.get_node(cvtag.get())
+            gData.PID_SP = gData.comm.get_node(sptag.get())
+
+        except Exception as e:  
+            if 'could not post' not in str(e):
+                spstatus.set('OPC Comms Error: ' + str(e))
+                cvstatus.set('OPC Comms Error: ' + str(e))
+                pvstatus.set('OPC Comms Error: ' + str(e))
+                messagebox.showerror("OPC Connection Error ", "Check the OPC Server address and Tag Names are correct\n\n"+str(e.__class__))
+            stop()
 
     def thread_start():    
-        gData.looper = g.PeriodicInterval(start, 0.1)
+        if gData.livetrend==1:
+            gData.looper = g.PeriodicInterval(start, 1)
 
     def start():
         try:
             #Setup tags to read        
-            gData.PID_CV.read_value()
-            gData.PID_SP.read_value()            
-
             actualcv=round(gData.PID_CV.read_value(),2)
-            cvtext.set(actualcv)         
-            cvtag.configure(state="disabled")
-
+            cvtext.set(actualcv)      
             actualsp=round(gData.PID_SP.read_value(),2)
             sptext.set(actualsp)
-            sptag.configure(state="disabled")
 
             #Send CV to Process
             process.CV=gData.CV
@@ -111,7 +115,6 @@ def main():
             pv=float(pv[0])
             gData.PID_PV.write_attribute(ua.AttributeIds.Value, ua.DataValue(pv))
             pvtext.set(round(gData.PID_PV.read_value(),2))         
-            pvtag.configure(state="disabled")
 
             gData.scanCount+=1
         
@@ -121,8 +124,8 @@ def main():
             cvstatus.set('An exception occurred: {}'.format(e))     
         
     def stop():
-        gData.looper.stop()
-        gData.looper.join(0.1)
+        if hasattr(gData,'looper'): 
+            gData.looper.stop()
         button_start["state"] = "normal"
         button_stop["state"] = "disabled"
         ip.configure(state="normal")
@@ -132,10 +135,11 @@ def main():
         pvtag.configure(state="normal")
         cvtag.configure(state="normal")
         sptag.configure(state="normal")
-        ambient.configure(state="normal")       
+        ambient.configure(state="normal")         
+        if gData.livetrend==1:
+            gData.comm.disconnect()
         gData.livetrend=0
-        gData.comm.disconnect()
-        
+
     def livetrend(): 
         #Set up the figure
         fig = plt.figure()
@@ -158,8 +162,7 @@ def main():
         #Loop here
         def animate(i):     
             x = np.arange(len(gData.SP),dtype=int)
-            scale = 600 #Convert mS to Minutes
-            x=x/scale
+            x=x/60
             ax.set_xlim(0,max(x)*1.1)
             max_y=max(max(gData.PV),max(gData.CV),max(gData.SP))
             min_y=min(min(gData.PV),min(gData.CV),min(gData.SP))

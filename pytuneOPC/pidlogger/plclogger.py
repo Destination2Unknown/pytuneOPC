@@ -25,7 +25,8 @@ import threading
 from matplotlib import animation
 from datetime import datetime
 from asyncua.sync import Client,ua
-from pytunelogix.common import generalclasses as g
+from pytuneOPC.common import generalclasses as g
+from tkinter import messagebox
 
 def main():
     class data(object):
@@ -49,8 +50,7 @@ def main():
             self.ErrCount=0
             self.ReadCount=0
             self.SetupFlag=False
-            self.RunNowFlag=False
-            self.CSVFile=object          
+            self.RunNowFlag=False        
 
         def plc(self,ip):
             self.comm = Client(ip)
@@ -60,95 +60,93 @@ def main():
         
     def Record():
         if gData.SetupFlag==False:
-            #Setup communnication object 
-            gData.plc(ip.get())            
-            gData.comm.connect()                  
-            spstatus.set("")
-            pvstatus.set("")
-            cvstatus.set("")        
-            gData.ErrCount=0
-            gData.ReadCount=0
-            gData.SetupFlag=True 
-            gData.RunNowFlag=True
-            button_record.configure(bg = "Black")
-            button_record["state"] = "disabled"
-            gData.PID_PV = gData.comm.get_node(pvtexttag.get())
-            gData.PID_CV = gData.comm.get_node(cvtexttag.get())
-            gData.PID_SP = gData.comm.get_node(sptexttag.get())
             try:
-                #Write new data to csv if read was successful, if not write last value, Open File or create if it doesn't exist
-                gData.CSVFile = open(fname.get(), 'a')
-                gData.CSVFileWriter = csv.writer(gData.CSVFile, delimiter=';', lineterminator='\n', quotechar='/', quoting=csv.QUOTE_MINIMAL)
-                #Write headers if its a new file
-                if os.stat(fname.get()).st_size == 0:
-                    gData.CSVFileWriter.writerow(('PV','CV','SP','TimeStamp'))
+                spstatus.set("")
+                pvstatus.set("")
+                cvstatus.set("")  
+                #Setup communnication object 
+                gData.plc(ip.get())            
+                gData.comm.connect()               
+                gData.ErrCount=0
+                gData.ReadCount=0
+                gData.SetupFlag=True 
+                gData.RunNowFlag=True
+                button_record.configure(bg = "Black")
+                button_record["state"] = "disabled"
+                gData.PID_PV = gData.comm.get_node(pvtexttag.get())
+                gData.PID_CV = gData.comm.get_node(cvtexttag.get())
+                gData.PID_SP = gData.comm.get_node(sptexttag.get())
+                #Disable inputs
+                pvtexttag.configure(state="disabled")
+                cvtexttag.configure(state="disabled")
+                sptexttag.configure(state="disabled")  
+                ip.configure(state="disabled")
+                fname.configure(state="disabled")
+                button_record.configure(bg = "Green")
+                button_livetrend["state"] = "normal"  
+                try:
+                    #Write new data to csv if read was successful, if not write last value, Open File or create if it doesn't exist
+                    gData.CSVFile = open(fname.get(), 'a')
+                    gData.CSVFileWriter = csv.writer(gData.CSVFile, delimiter=';', lineterminator='\n', quotechar='/', quoting=csv.QUOTE_MINIMAL)
+                    #Write headers if its a new file
+                    if os.stat(fname.get()).st_size == 0:
+                        gData.CSVFileWriter.writerow(('PV','CV','SP','TimeStamp'))
+
+                except Exception as e:    
+                    spstatus.set('File Error: ' + str(e))  
+                    cvstatus.set('File Error: ' + str(e))  
+                    pvstatus.set('File Error: ' + str(e)) 
+
+            except Exception as e:  
+                spstatus.set('OPC Comms Error: ' + str(e))
+                cvstatus.set('OPC Comms Error: ' + str(e))
+                pvstatus.set('OPC Comms Error: ' + str(e))
+                messagebox.showerror("OPC Connection Error ", "Check the OPC Server address and Tag Names are correct\n\n"+str(e.__class__))
+                Stop()
+  
+        else:
+            current_date_time = datetime.utcnow().strftime('%d-%m-%Y %H:%M:%S.%f')
+            try:            
+                #Setup tags to read               
+                actualpv=round(gData.PID_PV.read_value(),2)
+                pvtext.set(actualpv)               
+                actualcv=round(gData.PID_CV.read_value(),2)
+                cvtext.set(actualcv)           
+                actualsp=round(gData.PID_SP.read_value(),2)
+                sptext.set(actualsp)
+                #If successful increment read counter
+                gData.ReadCount+=1
 
             except Exception as e:    
-                spstatus.set('File Error: ' + str(e))  
-                cvstatus.set('File Error: ' + str(e))  
-                pvstatus.set('File Error: ' + str(e)) 
-
-        current_date_time = datetime.utcnow().strftime('%d-%m-%Y %H:%M:%S.%f')    
-
-        try:            
-            #Setup tags to read            
-            gData.PID_PV.read_value()
-            gData.PID_CV.read_value()
-            gData.PID_SP.read_value()
-    
-            actualpv=round(gData.PID_PV.read_value(),2)
-            pvtext.set(actualpv)         
-            pvtexttag.configure(state="disabled")
-
-            actualcv=round(gData.PID_CV.read_value(),2)
-            cvtext.set(actualcv)         
-            cvtexttag.configure(state="disabled")
-
-            actualsp=round(gData.PID_SP.read_value(),2)
-            sptext.set(actualsp)
-            sptexttag.configure(state="disabled")
-
-            #Disable inputs if tag read is successful
-            deltat.configure(state="disabled")
-            ip.configure(state="disabled")
-            fname.configure(state="disabled")
-            button_record.configure(bg = "Green")
-            button_livetrend["state"] = "normal"            
-
-            #If successful increment read counter
-            gData.ReadCount+=1
-
-        except Exception as e:    
-            if len(gData.PV>0):
-                actualpv=gData.PV[-1]
-            else:
-                actualpv=0
-            if len(gData.CV>0):
-                actualcv=gData.CV[-1]
-            else:
-                actualcv=0
-            if len(gData.SP>0):
-                actualsp=gData.SP[-1]
-            else:
-                actualsp=0
-            #If read fails update error counter
-            gData.ErrCount+=1
-
-            spstatus.set('Error: ' + str(e))  
-            cvstatus.set('Error: ' + str(e))  
-            pvstatus.set('Error: ' + str(e))
-        
-        finally:
-            ec='Errors: '+ str(gData.ErrCount)
-            rc='Reads: '+ str(gData.ReadCount)
-            errorcount.set(ec)
-            readcount.set(rc)
-            #Write all values to csv file  
-            row = [actualpv,actualcv,actualsp]
-            gData.update(actualpv,actualcv,actualsp)            
-            row.append(current_date_time)
-            if gData.RunNowFlag:
-                gData.CSVFileWriter.writerow(row)    
+                if len(gData.PV>0):
+                    actualpv=gData.PV[-1]
+                else:
+                    actualpv=0
+                if len(gData.CV>0):
+                    actualcv=gData.CV[-1]
+                else:
+                    actualcv=0
+                if len(gData.SP>0):
+                    actualsp=gData.SP[-1]
+                else:
+                    actualsp=0
+                #If read fails update error counter
+                gData.ErrCount+=1
+                spstatus.set('Error: ' + str(e))  
+                cvstatus.set('Error: ' + str(e))  
+                pvstatus.set('Error: ' + str(e))
+            
+            finally:
+                ec='Errors: '+ str(gData.ErrCount)
+                rc='Reads: '+ str(gData.ReadCount)
+                errorcount.set(ec)
+                readcount.set(rc)
+                #Write all values to csv file  
+                row = [actualpv,actualcv,actualsp]
+                gData.update(actualpv,actualcv,actualsp)            
+                row.append(current_date_time)
+                if gData.RunNowFlag:
+                    gData.CSVFileWriter.writerow(row)    
             
     def Write():
         if spsend.get() or cvsend.get():
@@ -174,8 +172,9 @@ def main():
 
             except Exception as e:    
                 spstatus.set('Write Error: ' + str(e))  
-                cvstatus.set('Write Error: ' + str(e))          
-
+                cvstatus.set('Write Error: ' + str(e))     
+                messagebox.showerror("OPC Connection Error ", "Check the OPC Server address and Tag Names are correct")
+     
     def TrendFileData():
         try:
             if gData.RunNowFlag:
@@ -218,9 +217,8 @@ def main():
 
         #Loop here
         def animate(i):     
-            x = np.arange(len(gData.SP),dtype=int)
-            scale = int(60*1000/int(deltat.get())) #Convert mS to Minutes
-            x=x/scale
+            x = np.arange(len(gData.SP),dtype=int)            
+            x=x/60
             ax.set_xlim(0,max(x)*1.1)
             SP.set_data(x,gData.SP)
             CV.set_data(x,gData.CV)
@@ -229,28 +227,33 @@ def main():
 
         #Live Data
         if gData.RunNowFlag:
-            anim = animation.FuncAnimation(fig, animate, init_func=init, frames=100, interval=1000) #, blit=True) # cant use blit with dynamic x-axis
+            anim = animation.FuncAnimation(fig, animate, init_func=init, frames=100, interval=1000)
 
         plt.show()
 
-    def Stop():        
-        gData.loop_record.stop()                                        
-        gData.loop_record.join(0.11)
-        #Enable text box entry
-        sptexttag.configure(state="normal")
-        pvtexttag.configure(state="normal")
-        cvtexttag.configure(state="normal")
-        deltat.configure(state="normal")
-        ip.configure(state="normal")
-        fname.configure(state="normal")        
-        button_record.configure(bg = "#f0f0f0")
-        button_livetrend["state"] = "disabled"
-        button_record["state"] = "normal"        
-        if not gData.CSVFile.closed:
-            gData.CSVFile.close()
-        gData.reset()
-        plt.close('all')
-        gData.comm.disconnect()
+    def Stop():   
+        try:     
+            gData.loop_record.stop()                                        
+            #Enable text box entry
+            sptexttag.configure(state="normal")
+            pvtexttag.configure(state="normal")
+            cvtexttag.configure(state="normal")
+            ip.configure(state="normal")
+            fname.configure(state="normal")        
+            button_record.configure(bg = "#f0f0f0")
+            button_livetrend["state"] = "disabled"
+            button_record["state"] = "normal" 
+            if hasattr(gData,'CSVFile'):       
+                if not gData.CSVFile.closed:
+                    gData.CSVFile.close()
+            if gData.RunNowFlag:
+                gData.comm.disconnect()
+            gData.reset()
+            plt.close('all')
+
+        except Exception as e: 
+            if 'could not post' not in str(e):
+                pvstatus.set('An exception occurred: {}'.format(e))            
 
     #Gui
     root = tk.Tk()
@@ -325,7 +328,8 @@ def main():
     sptexttag.insert(0, "ns=2;s=Channel1.Device1.PID_SP")
     pvtexttag.insert(0, "ns=2;s=Channel1.Device1.PID_PV")
     cvtexttag.insert(0, "ns=2;s=Channel1.Device1.PID_CV")
-    deltat.insert(0, "100")
+    deltat.insert(0, "1000")
+    deltat.configure(state="disabled")
     ip.insert(0, "opc.tcp://192.168.123.100:49320")
     fname.insert(0,"D:\Trend.csv")
 

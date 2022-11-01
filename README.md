@@ -53,13 +53,22 @@ plclogger.main()
 _________________________________________________________________________________________________________________________
 **Stage 1 - PID Tuner based on a CSV file of a Process Reaction Curve (PRC)**
 
-_Assumes CV and PV data stored at 100ms intervals._
-
+> ***Notes and Limitations:***
+>
+> - _Assumes CV and PV data stored at 1 second intervals._
+>
+> - _Assumes there is a single step in CV._
+>
+> - _Ambient is calculated as an average of the PV prior to the step change._
+>
+> - _Doesn't work correctly with a ramp in CV or with multiple CV steps._
+>
+>
 
 
 To launch use:
 ```
-from pytunelogix.stage1 import csvtuner
+from pytuneOPC.stage1 import csvtuner
 
 csvtuner.main()
 
@@ -76,62 +85,6 @@ Reverse Acting:
 ![U_TuneR](https://user-images.githubusercontent.com/92536730/179394927-d35f3e2f-943c-41cc-bfff-cfee028a821f.PNG)
 
 
-
-
-_________________________________________________________________________________________________________________________
-**Stage 2 - Open loop tune**
-
-
-
-
-
-https://user-images.githubusercontent.com/92536730/175918442-017d18a0-0bac-434d-aa44-b8cd3aebe231.mp4
-
-
-
-
-```
-
-WIP
-
-```
-
-
-
-_________________________________________________________________________________________________________________________
-**Stage 3 - Closed loop tune**
-
-
-
-https://user-images.githubusercontent.com/92536730/175920990-3fc2cb66-9d08-4c67-aff7-ff410345f9a5.mp4
-
-
-
-
-```
-
-WIP
-
-```
-
-
-
-_________________________________________________________________________________________________________________________
-**Stage 4 - Adaptive tuner**
-
-
-
-
-https://user-images.githubusercontent.com/92536730/175921177-86389b8f-2d3c-4dc7-8949-db4cdd782d84.mp4
-
-
-
-
-```
-
-WIP
-
-```
 
 _________________________________________________________________________________________________________________________
 **PID Simulator**
@@ -157,7 +110,7 @@ Direct Acting:
 
 To launch use:
 ```
-from pytunelogix.simulate import simulator
+from pytuneOPC.simulate import simulator
 
 simulator.main()
     

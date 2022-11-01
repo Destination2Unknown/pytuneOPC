@@ -1,7 +1,7 @@
 from pytuneOPC.pidlogger import plclogger
-from pytunelogix.stage1 import csvtuner
+from pytuneOPC.stage1 import csvtuner
 from pytuneOPC.plcpidsim import plcsim
-from pytunelogix.simulate import simulator
+from pytuneOPC.simulate import simulator
 
 plclogger.main()
 csvtuner.main()
