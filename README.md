@@ -143,4 +143,7 @@ ________________________________________________________________________________
 Windows Exe:
 
 
-![image](https://user-images.githubusercontent.com/92536730/184161990-c221eec5-acc6-43b8-ad2f-85367814301a.png)
+
+
+![image](https://user-images.githubusercontent.com/92536730/199230955-83c7ec09-d215-4a93-9e5e-548147804698.png)
+
