@@ -7,7 +7,7 @@
 ![GitHub repo size](https://img.shields.io/github/repo-size/destination2unknown/pytuneOPC)
 ![PyPI - License](https://img.shields.io/pypi/l/pytuneOPC)
 
-Windows Exe (no install required) ->https://github.com/Destination2Unknown/pytuneOPC/releases
+Windows Exe (no install required) -> https://github.com/Destination2Unknown/pytuneOPC/releases
 
 To install use:
 
@@ -28,7 +28,7 @@ D-> Test tune with FOPDT Simulator for PLC using OPC-UA
 Create a launch file:
 
 ```
-examplelaunch.pyw #use pyw for no console
+examplelaunch.pyw #use pyw for no console  
 ```
 
 _________________________________________________________________________________________________________________________
@@ -61,9 +61,19 @@ ________________________________________________________________________________
 >
 > - _Ambient is calculated as an average of the PV prior to the step change._
 >
-> - _Doesn't work correctly with a ramp in CV or with multiple CV steps._
->
->
+> - _Doesn't work correctly with a ramp in CV or with multiple CV steps._  
+>  
+>  
+>  
+> ***N.B.***  
+> The PID tuning values are calculated for a PV with a standard range span of 100 in engineering units (e.g. 0-100 deg C or 50-150 deg F).              
+> If the range of the PV has a different span the PID tuning values need to be rescaled:
+> 
+>       Example 1: PV range of 200-400 deg C -> PID Gains x2
+> 
+>       Example 2: PV range of 75-100 deg C -> PID Gains x0.25
+>  
+>  
 
 
 To launch use:
