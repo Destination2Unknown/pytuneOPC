@@ -107,12 +107,13 @@ def main():
         else:
             current_date_time = datetime.utcnow().strftime('%d-%m-%Y %H:%M:%S.%f')
             try:            
-                #Setup tags to read               
-                actualpv=round(gData.PID_PV.read_value(),2)
+                #Setup tags to read       
+                retOPC=gData.comm.read_values((gData.PID_PV,gData.PID_CV,gData.PID_SP))
+                actualpv=round(retOPC[0],2)
                 pvtext.set(actualpv)               
-                actualcv=round(gData.PID_CV.read_value(),2)
+                actualcv=round(retOPC[1],2)
                 cvtext.set(actualcv)           
-                actualsp=round(gData.PID_SP.read_value(),2)
+                actualsp=round(retOPC[2],2)
                 sptext.set(actualsp)
                 #If successful increment read counter
                 gData.ReadCount+=1

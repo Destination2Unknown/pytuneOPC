@@ -90,10 +90,11 @@ def main():
 
     def start():
         try:
-            #Setup tags to read        
-            actualcv=round(gData.PID_CV.read_value(),2)
+            #Setup tags to read  
+            retOPC=gData.comm.read_values((gData.PID_CV,gData.PID_SP))      
+            actualcv=round(retOPC[0],2)
             cvtext.set(actualcv)      
-            actualsp=round(gData.PID_SP.read_value(),2)
+            actualsp=round(retOPC[1],2)
             sptext.set(actualsp)
 
             #Send CV to Process
