@@ -1,4 +1,11 @@
-# pytuneOPC
+# Note: Project Archived
+For a new and improved version, see [https://github.com/PIDTuningIreland/pyPIDTune](https://github.com/PIDTuningIreland/pyPIDTune)
+
+
+---
+
+
+### pytuneOPC
 **Python PID Tuner using OPC-UA**
 
 ![PyPI](https://img.shields.io/pypi/v/pytuneOPC?label=pypi%20package)
